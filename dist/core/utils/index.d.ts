@@ -6,17 +6,17 @@ export declare const paginationSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    sortOrder?: "asc" | "desc";
-    search?: string;
     limit?: number;
     page?: number;
     sortBy?: string;
+    sortOrder?: "desc" | "asc";
+    search?: string;
 }, {
-    sortOrder?: "asc" | "desc";
-    search?: string;
     limit?: number;
     page?: number;
     sortBy?: string;
+    sortOrder?: "desc" | "asc";
+    search?: string;
 }>;
 export type PaginationQuery = z.infer<typeof paginationSchema>;
 export declare function getPaginationParams(query: PaginationQuery): {
