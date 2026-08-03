@@ -48,7 +48,7 @@ export function buildPaginatedResponse<T>(
 
 // ---- Auth Helpers ----
 
-export function getUserId(req: Request): string {
+export function getUserId(req: any): string {
   if (!req.user?.userId) {
     throw new Error('User not authenticated');
   }

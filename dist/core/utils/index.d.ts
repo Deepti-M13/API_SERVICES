@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import { z } from 'zod';
 export declare const paginationSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodNumber>;
@@ -7,17 +6,17 @@ export declare const paginationSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    sortOrder?: "asc" | "desc";
     limit?: number;
-    search?: string;
     page?: number;
     sortBy?: string;
-    sortOrder?: "desc" | "asc";
+    search?: string;
 }, {
+    sortOrder?: "asc" | "desc";
     limit?: number;
-    search?: string;
     page?: number;
     sortBy?: string;
-    sortOrder?: "desc" | "asc";
+    search?: string;
 }>;
 export type PaginationQuery = z.infer<typeof paginationSchema>;
 export declare function getPaginationParams(query: PaginationQuery): {
@@ -35,7 +34,7 @@ export declare function buildPaginatedResponse<T>(data: T[], total: number, page
         hasMore: boolean;
     };
 };
-export declare function getUserId(req: Request): string;
+export declare function getUserId(req: any): string;
 export declare function startOfDay(date?: Date): Date;
 export declare function endOfDay(date?: Date): Date;
 export declare function daysAgo(days: number): Date;

@@ -2,6 +2,7 @@
 // Life OS — Express Application
 // Minimal app configuration for deployment
 // Last Updated: August 3, 2026 - All endpoints active
+// Uses Prisma + SQLite for persistent storage
 // =============================================================
 
 import express from 'express';
@@ -10,8 +11,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler } from './core/middleware/error.middleware.js';
+import { PrismaClient } from '@prisma/client';
 
 const app = express();
+const prisma = new PrismaClient();
 
 // ---- Global Middleware ----
 
@@ -135,32 +138,112 @@ app.get('/api/auth/me', (req, res) => {
   return res.json(user);
 });
 
-// In-memory task storage (persists during server uptime)
-const tasksStore: any[] = [];
-let taskIdCounter = 1;
+// ---- Task Endpoints with Database Persistence ----
 
-// Task endpoints with actual storage
-app.get('/api/tasks', (_req, res) => {
-  res.json(tasksStore);
+app.get('/api/tasks', async (_req, res) => {
+  try {
+    // Get tasks from database
+    // For now, get all tasks without user filtering (MVP)
+    const tasks = await prisma.task.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(tasks);
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
+  }
 });
 
-app.post('/api/tasks', (req, res) => {
-  const task = {
-    id: String(taskIdCounter++),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  tasksStore.push(task);
-  res.status(201).json(task);
+app.post('/api/tasks', async (req, res) => {
+  try {
+    const { title, description, status = 'TODO', priority = 'NONE', dueDate } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    // Create task in database
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description,
+        status,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        userId: 'default-user', // MVP: use default user
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+    
+    return res.status(201).json(task);
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return res.status(500).json({ error: 'Failed to create task' });
+  }
 });
 
-app.get('/api/projects', (_req, res) => {
-  res.json([]);
+// ---- Projects Endpoints ----
+
+app.get('/api/projects', async (_req, res) => {
+  try {
+    const projects = await prisma.project.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        color: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(projects);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ error: 'Failed to fetch projects' });
+  }
 });
 
-app.get('/api/workspaces', (_req, res) => {
-  res.json([]);
+// ---- Workspaces Endpoints ----
+
+app.get('/api/workspaces', async (_req, res) => {
+  try {
+    const workspaces = await prisma.workspace.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isPersonal: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(workspaces);
+  } catch (error) {
+    console.error('Error fetching workspaces:', error);
+    res.status(500).json({ error: 'Failed to fetch workspaces' });
+  }
 });
 
 app.get('/api/analytics/dashboard', (_req, res) => {
@@ -176,72 +259,183 @@ app.get('/api/analytics/dashboard', (_req, res) => {
   });
 });
 
-// In-memory storage for all features
-const goalsStore: any[] = [];
-const habitsStore: any[] = [];
-const notesStore: any[] = [];
-const projectsStore: any[] = [];
-const workspacesStore: any[] = [];
+// ---- Goals Endpoints ----
 
-let goalIdCounter = 1;
-let habitIdCounter = 1;
-let noteIdCounter = 1;
-let projectIdCounter = 1;
-let workspaceIdCounter = 1;
-
-app.get('/api/goals', (_req, res) => {
-  res.json(goalsStore);
+app.get('/api/goals', async (_req, res) => {
+  try {
+    const goals = await prisma.goal.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        targetDate: true,
+        progress: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(goals);
+  } catch (error) {
+    console.error('Error fetching goals:', error);
+    res.status(500).json({ error: 'Failed to fetch goals' });
+  }
 });
 
-app.post('/api/goals', (req, res) => {
-  const goal = {
-    id: String(goalIdCounter++),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  goalsStore.push(goal);
-  res.status(201).json(goal);
+app.post('/api/goals', async (req, res) => {
+  try {
+    const { title, description, status = 'NOT_STARTED', targetDate, progress = 0 } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const goal = await prisma.goal.create({
+      data: {
+        title,
+        description,
+        status,
+        targetDate: targetDate ? new Date(targetDate) : null,
+        progress,
+        userId: 'default-user',
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        targetDate: true,
+        progress: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+    
+    return res.status(201).json(goal);
+  } catch (error) {
+    console.error('Error creating goal:', error);
+    return res.status(500).json({ error: 'Failed to create goal' });
+  }
 });
 
-// Habits endpoints
-app.get('/api/habits', (_req, res) => {
-  res.json(habitsStore);
+// ---- Habits Endpoints ----
+
+app.get('/api/habits', async (_req, res) => {
+  try {
+    const habits = await prisma.habit.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        frequency: true,
+        currentStreak: true,
+        longestStreak: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(habits);
+  } catch (error) {
+    console.error('Error fetching habits:', error);
+    res.status(500).json({ error: 'Failed to fetch habits' });
+  }
 });
 
-app.post('/api/habits', (req, res) => {
-  const habit = {
-    id: String(habitIdCounter++),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  habitsStore.push(habit);
-  res.status(201).json(habit);
+app.post('/api/habits', async (req, res) => {
+  try {
+    const { name, description, frequency = 'DAILY', isActive = true } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const habit = await prisma.habit.create({
+      data: {
+        name,
+        description,
+        frequency,
+        isActive,
+        userId: 'default-user',
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        frequency: true,
+        currentStreak: true,
+        longestStreak: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+    
+    return res.status(201).json(habit);
+  } catch (error) {
+    console.error('Error creating habit:', error);
+    return res.status(500).json({ error: 'Failed to create habit' });
+  }
 });
 
-// Notes endpoints
-app.get('/api/notes', (_req, res) => {
-  res.json(notesStore);
+// ---- Notes Endpoints ----
+
+app.get('/api/notes', async (_req, res) => {
+  try {
+    const notes = await prisma.note.findMany({
+      select: {
+        id: true,
+        title: true,
+        plainText: true,
+        isPinned: true,
+        isFavorite: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(notes);
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    res.status(500).json({ error: 'Failed to fetch notes' });
+  }
 });
 
-app.post('/api/notes', (req, res) => {
-  const note = {
-    id: String(noteIdCounter++),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  notesStore.push(note);
-  res.status(201).json(note);
-});
+app.post('/api/notes', async (req, res) => {
+  try {
+    const { title, plainText, content, isPinned = false, isFavorite = false } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
 
-app.get('/api/projects', (_req, res) => {
-  res.json(projectsStore);
-});
-
-app.get('/api/workspaces', (_req, res) => {
-  res.json(workspacesStore);
+    const note = await prisma.note.create({
+      data: {
+        title,
+        plainText,
+        content,
+        isPinned,
+        isFavorite,
+        userId: 'default-user',
+      },
+      select: {
+        id: true,
+        title: true,
+        plainText: true,
+        isPinned: true,
+        isFavorite: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+    
+    return res.status(201).json(note);
+  } catch (error) {
+    console.error('Error creating note:', error);
+    return res.status(500).json({ error: 'Failed to create note' });
+  }
 });
 
 app.use((_req, res) => {
