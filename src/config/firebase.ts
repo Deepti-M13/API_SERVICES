@@ -36,6 +36,6 @@ const app = initializeAdminApp();
 
 export const firestoreAdmin = getFirestore(app);
 export const storageAdmin = getStorage(app);
-export const authAdmin = adminAny.auth();
+export const authAdmin = app.auth();
 
 export default app;
