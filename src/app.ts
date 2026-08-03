@@ -145,11 +145,11 @@ app.post('/api/tasks', (req, res) => {
 });
 
 app.get('/api/projects', (_req, res) => {
-  res.json({ data: [] });
+  res.json([]);
 });
 
 app.get('/api/workspaces', (_req, res) => {
-  res.json({ data: [] });
+  res.json([]);
 });
 
 app.get('/api/analytics/dashboard', (_req, res) => {
@@ -167,7 +167,7 @@ app.get('/api/analytics/dashboard', (_req, res) => {
 
 // Goals endpoints
 app.get('/api/goals', (_req, res) => {
-  res.json({ data: [] });
+  res.json([]);
 });
 
 app.post('/api/goals', (req, res) => {
@@ -176,7 +176,7 @@ app.post('/api/goals', (req, res) => {
 
 // Habits endpoints
 app.get('/api/habits', (_req, res) => {
-  res.json({ data: [] });
+  res.json([]);
 });
 
 app.post('/api/habits', (req, res) => {
@@ -185,7 +185,7 @@ app.post('/api/habits', (req, res) => {
 
 // Notes endpoints
 app.get('/api/notes', (_req, res) => {
-  res.json({ data: [] });
+  res.json([]);
 });
 
 app.post('/api/notes', (req, res) => {
