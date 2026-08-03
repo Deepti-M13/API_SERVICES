@@ -20,7 +20,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@life-os/shared": "*",
+    "@life-os/shared": "file:./packages/shared",
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.6.0",
