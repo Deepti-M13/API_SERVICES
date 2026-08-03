@@ -173,6 +173,27 @@ app.post('/api/tasks', async (req, res) => {
     }
 
     // Create task in database
+    // For MVP, we create a default user if needed
+    let userId = 'default-user';
+    
+    // Try to get or create default user
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'demo@lifeos.local' }
+    }).catch(() => null);
+    
+    if (!existingUser) {
+      const defaultUser = await prisma.user.create({
+        data: {
+          email: 'demo@lifeos.local',
+          password: 'demo',
+          name: 'Demo User',
+        }
+      });
+      userId = defaultUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
     const task = await prisma.task.create({
       data: {
         title,
@@ -180,7 +201,7 @@ app.post('/api/tasks', async (req, res) => {
         status,
         priority,
         dueDate: dueDate ? new Date(dueDate) : null,
-        userId: 'default-user', // MVP: use default user
+        userId,
       },
       select: {
         id: true,
@@ -291,6 +312,25 @@ app.post('/api/goals', async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
 
+    // Get or create default user
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'demo@lifeos.local' }
+    }).catch(() => null);
+    
+    let userId = 'default-user';
+    if (!existingUser) {
+      const defaultUser = await prisma.user.create({
+        data: {
+          email: 'demo@lifeos.local',
+          password: 'demo',
+          name: 'Demo User',
+        }
+      }).catch(() => null);
+      if (defaultUser) userId = defaultUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
     const goal = await prisma.goal.create({
       data: {
         title,
@@ -298,7 +338,7 @@ app.post('/api/goals', async (req, res) => {
         status,
         targetDate: targetDate ? new Date(targetDate) : null,
         progress,
-        userId: 'default-user',
+        userId,
       },
       select: {
         id: true,
@@ -352,13 +392,32 @@ app.post('/api/habits', async (req, res) => {
       return res.status(400).json({ error: 'Name is required' });
     }
 
+    // Get or create default user
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'demo@lifeos.local' }
+    }).catch(() => null);
+    
+    let userId = 'default-user';
+    if (!existingUser) {
+      const defaultUser = await prisma.user.create({
+        data: {
+          email: 'demo@lifeos.local',
+          password: 'demo',
+          name: 'Demo User',
+        }
+      }).catch(() => null);
+      if (defaultUser) userId = defaultUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
     const habit = await prisma.habit.create({
       data: {
         name,
         description,
         frequency,
         isActive,
-        userId: 'default-user',
+        userId,
       },
       select: {
         id: true,
@@ -411,6 +470,25 @@ app.post('/api/notes', async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
 
+    // Get or create default user
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'demo@lifeos.local' }
+    }).catch(() => null);
+    
+    let userId = 'default-user';
+    if (!existingUser) {
+      const defaultUser = await prisma.user.create({
+        data: {
+          email: 'demo@lifeos.local',
+          password: 'demo',
+          name: 'Demo User',
+        }
+      }).catch(() => null);
+      if (defaultUser) userId = defaultUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
     const note = await prisma.note.create({
       data: {
         title,
@@ -418,7 +496,7 @@ app.post('/api/notes', async (req, res) => {
         content,
         isPinned,
         isFavorite,
-        userId: 'default-user',
+        userId,
       },
       select: {
         id: true,

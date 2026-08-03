@@ -151,6 +151,25 @@ app.post('/api/tasks', async (req, res) => {
             return res.status(400).json({ error: 'Title is required' });
         }
         // Create task in database
+        // For MVP, we create a default user if needed
+        let userId = 'default-user';
+        // Try to get or create default user
+        const existingUser = await prisma.user.findUnique({
+            where: { email: 'demo@lifeos.local' }
+        }).catch(() => null);
+        if (!existingUser) {
+            const defaultUser = await prisma.user.create({
+                data: {
+                    email: 'demo@lifeos.local',
+                    password: 'demo',
+                    name: 'Demo User',
+                }
+            });
+            userId = defaultUser.id;
+        }
+        else {
+            userId = existingUser.id;
+        }
         const task = await prisma.task.create({
             data: {
                 title,
@@ -158,7 +177,7 @@ app.post('/api/tasks', async (req, res) => {
                 status,
                 priority,
                 dueDate: dueDate ? new Date(dueDate) : null,
-                userId: 'default-user', // MVP: use default user
+                userId,
             },
             select: {
                 id: true,
