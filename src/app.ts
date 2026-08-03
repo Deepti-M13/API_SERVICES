@@ -56,16 +56,24 @@ app.get('/api/status', (_req, res) => {
 app.post('/api/auth/register', (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ 
+      error: { 
+        message: 'Missing required fields',
+        code: 'INVALID_INPUT'
+      } 
+    });
   }
-  res.json({
-    user: {
-      id: email.split('@')[0],
-      email,
-      name,
-      timezone: 'UTC',
-      createdAt: new Date(),
-    },
+  const user = {
+    id: email.split('@')[0],
+    email,
+    name,
+    avatarUrl: null,
+    timezone: 'UTC',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  return res.status(201).json({
+    user,
     tokens: {
       accessToken: `token-${email}`,
       refreshToken: `refresh-${email}`,
@@ -76,16 +84,24 @@ app.post('/api/auth/register', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ error: 'Missing email or password' });
+    return res.status(400).json({ 
+      error: { 
+        message: 'Missing email or password',
+        code: 'INVALID_CREDENTIALS'
+      } 
+    });
   }
-  res.json({
-    user: {
-      id: email.split('@')[0],
-      email,
-      name: email.split('@')[0],
-      timezone: 'UTC',
-      createdAt: new Date(),
-    },
+  const user = {
+    id: email.split('@')[0],
+    email,
+    name: email.split('@')[0],
+    avatarUrl: null,
+    timezone: 'UTC',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  return res.json({
+    user,
     tokens: {
       accessToken: `token-${email}`,
       refreshToken: `refresh-${email}`,
