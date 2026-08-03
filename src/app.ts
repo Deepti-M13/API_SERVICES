@@ -111,6 +111,29 @@ app.post('/api/auth/login', (req, res) => {
 
 // ---- Error Handling ----
 
+app.get('/api/auth/me', (req, res) => {
+  // Get token from header
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } });
+  }
+  
+  // Extract email from token (token format: "token-email@example.com")
+  const email = token.replace('token-', '');
+  
+  const user = {
+    id: email.split('@')[0],
+    email,
+    name: email.split('@')[0],
+    avatarUrl: null,
+    timezone: 'UTC',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  
+  return res.json(user);
+});
+
 // Mock endpoints for frontend data
 app.get('/api/tasks', (_req, res) => {
   res.json([]);
@@ -121,11 +144,11 @@ app.post('/api/tasks', (req, res) => {
 });
 
 app.get('/api/projects', (_req, res) => {
-  res.json([]);
+  res.json({ data: [] });
 });
 
 app.get('/api/workspaces', (_req, res) => {
-  res.json([]);
+  res.json({ data: [] });
 });
 
 app.get('/api/analytics/dashboard', (_req, res) => {
