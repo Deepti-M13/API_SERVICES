@@ -111,6 +111,36 @@ app.post('/api/auth/login', (req, res) => {
 
 // ---- Error Handling ----
 
+// Mock endpoints for frontend data
+app.get('/api/tasks', (_req, res) => {
+  res.json([]);
+});
+
+app.post('/api/tasks', (req, res) => {
+  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+});
+
+app.get('/api/projects', (_req, res) => {
+  res.json([]);
+});
+
+app.get('/api/workspaces', (_req, res) => {
+  res.json([]);
+});
+
+app.get('/api/analytics/dashboard', (_req, res) => {
+  res.json({
+    tasksToday: 0,
+    tasksCompleted: 0,
+    tasksOverdue: 0,
+    currentStreak: 0,
+    focusMinutesToday: 0,
+    xp: 0,
+    level: 1,
+    productivityScore: 0,
+  });
+});
+
 app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
