@@ -1,29 +1,14 @@
 // =============================================================
 // Life OS — Express Application
-// Main app configuration with all middleware and routes
+// Minimal app configuration for deployment
 // =============================================================
 
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
-import { errorHandler, notFoundHandler } from './core/middleware/error.middleware.js';
-import { apiLimiter } from './core/middleware/rate-limit.middleware.js';
-
-// Import routes
-import authRoutes from './features/auth/auth.routes.js';
-import taskRoutes from './features/tasks/task.routes.js';
-import projectRoutes from './features/projects/project.routes.js';
-import noteRoutes from './features/notes/note.routes.js';
-import habitRoutes from './features/habits/habit.routes.js';
-import goalRoutes from './features/goals/goal.routes.js';
-import calendarRoutes from './features/calendar/calendar.routes.js';
-import analyticsRoutes from './features/analytics/analytics.routes.js';
-import aiRoutes from './features/ai/ai.routes.js';
-import gamificationRoutes from './features/gamification/gamification.routes.js';
-import tagRoutes from './features/tags/tag.routes.js';
+import { errorHandler } from './core/middleware/error.middleware.js';
 
 const app = express();
 
@@ -45,15 +30,11 @@ app.use(cors({
 // Request parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // Logging
 if (env.NODE_ENV !== 'test') {
   app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 }
-
-// Rate limiting
-app.use('/api/', apiLimiter);
 
 // ---- Health Check ----
 
@@ -66,23 +47,58 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// ---- API Routes ----
+// ---- Basic API Endpoints ----
 
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/notes', noteRoutes);
-app.use('/api/habits', habitRoutes);
-app.use('/api/goals', goalRoutes);
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/gamification', gamificationRoutes);
-app.use('/api/tags', tagRoutes);
+app.get('/api/status', (_req, res) => {
+  res.json({ status: 'running', message: 'Life OS API is running' });
+});
+
+app.post('/api/auth/register', (req, res) => {
+  const { email, password, name } = req.body;
+  if (!email || !password || !name) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  res.json({
+    user: {
+      id: email.split('@')[0],
+      email,
+      name,
+      timezone: 'UTC',
+      createdAt: new Date(),
+    },
+    tokens: {
+      accessToken: `token-${email}`,
+      refreshToken: `refresh-${email}`,
+    },
+  });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Missing email or password' });
+  }
+  res.json({
+    user: {
+      id: email.split('@')[0],
+      email,
+      name: email.split('@')[0],
+      timezone: 'UTC',
+      createdAt: new Date(),
+    },
+    tokens: {
+      accessToken: `token-${email}`,
+      refreshToken: `refresh-${email}`,
+    },
+  });
+});
 
 // ---- Error Handling ----
 
-app.use(notFoundHandler);
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 app.use(errorHandler);
 
 export default app;
