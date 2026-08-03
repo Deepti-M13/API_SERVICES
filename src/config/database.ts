@@ -4,7 +4,6 @@
 // =============================================================
 
 import { firestoreAdmin } from './firebase.js';
-import { serializeFirestoreData } from './firestore.js';
 
 const COLLECTIONS: Record<string, string> = {
   user: 'users',
@@ -34,7 +33,7 @@ function getCollectionRef(name: string) {
 }
 
 function toPlainObject(data: Record<string, unknown>) {
-  return serializeFirestoreData(data) as Record<string, unknown>;
+  return data as Record<string, unknown>;
 }
 
 function getValue(record: Record<string, unknown>, field: string) {
