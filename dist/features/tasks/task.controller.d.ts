@@ -1,0 +1,13 @@
+import { Request, Response, NextFunction } from 'express';
+export declare function listTasks(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function createTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function updateTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function deleteTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function archiveTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function restoreTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function duplicateTask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function reorderTasks(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function createSubtask(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getComments(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function addComment(req: Request, res: Response, next: NextFunction): Promise<void>;

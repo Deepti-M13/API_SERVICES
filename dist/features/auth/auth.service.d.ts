@@ -1,0 +1,102 @@
+import type { RegisterInput, LoginInput, UpdateProfileInput } from './auth.schema.js';
+export declare function register(input: RegisterInput): Promise<{
+    user: {
+        id: any;
+        email: any;
+        name: any;
+        username: any;
+        phone: any;
+        bio: any;
+        birthday: any;
+        avatarUrl: any;
+        timezone: any;
+        language: any;
+        country: any;
+        occupation: any;
+        website: any;
+        socialLinks: any;
+        twoFactorEnabled: boolean;
+        appearance: any;
+        settings: any;
+        createdAt: any;
+        updatedAt: any;
+    };
+    tokens: {
+        accessToken: any;
+        refreshToken: any;
+    };
+}>;
+export declare function login(input: LoginInput): Promise<{
+    user: {
+        id: any;
+        email: any;
+        name: any;
+        username: any;
+        phone: any;
+        bio: any;
+        birthday: any;
+        avatarUrl: any;
+        timezone: any;
+        language: any;
+        country: any;
+        occupation: any;
+        website: any;
+        socialLinks: any;
+        twoFactorEnabled: boolean;
+        appearance: any;
+        settings: any;
+        createdAt: any;
+        updatedAt: any;
+    };
+    tokens: {
+        accessToken: any;
+        refreshToken: any;
+    };
+}>;
+export declare function refreshTokens(_refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+}>;
+export declare function logout(_refreshToken: string): Promise<any>;
+export declare function getProfile(userId: string): Promise<{
+    id: any;
+    email: any;
+    name: any;
+    username: any;
+    phone: any;
+    bio: any;
+    birthday: any;
+    avatarUrl: any;
+    timezone: any;
+    language: any;
+    country: any;
+    occupation: any;
+    website: any;
+    socialLinks: any;
+    twoFactorEnabled: boolean;
+    appearance: any;
+    settings: any;
+    createdAt: any;
+    updatedAt: any;
+}>;
+export declare function updateProfile(userId: string, input: UpdateProfileInput): Promise<{
+    id: any;
+    email: any;
+    name: any;
+    username: any;
+    phone: any;
+    bio: any;
+    birthday: any;
+    avatarUrl: any;
+    timezone: any;
+    language: any;
+    country: any;
+    occupation: any;
+    website: any;
+    socialLinks: any;
+    twoFactorEnabled: boolean;
+    appearance: any;
+    settings: any;
+    createdAt: any;
+    updatedAt: any;
+}>;
