@@ -135,13 +135,24 @@ app.get('/api/auth/me', (req, res) => {
   return res.json(user);
 });
 
-// Mock endpoints for frontend data
+// In-memory task storage (persists during server uptime)
+const tasksStore: any[] = [];
+let taskIdCounter = 1;
+
+// Task endpoints with actual storage
 app.get('/api/tasks', (_req, res) => {
-  res.json([]);
+  res.json(tasksStore);
 });
 
 app.post('/api/tasks', (req, res) => {
-  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+  const task = {
+    id: String(taskIdCounter++),
+    ...req.body,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  tasksStore.push(task);
+  res.status(201).json(task);
 });
 
 app.get('/api/projects', (_req, res) => {
@@ -165,31 +176,72 @@ app.get('/api/analytics/dashboard', (_req, res) => {
   });
 });
 
-// Goals endpoints
+// In-memory storage for all features
+const goalsStore: any[] = [];
+const habitsStore: any[] = [];
+const notesStore: any[] = [];
+const projectsStore: any[] = [];
+const workspacesStore: any[] = [];
+
+let goalIdCounter = 1;
+let habitIdCounter = 1;
+let noteIdCounter = 1;
+let projectIdCounter = 1;
+let workspaceIdCounter = 1;
+
 app.get('/api/goals', (_req, res) => {
-  res.json([]);
+  res.json(goalsStore);
 });
 
 app.post('/api/goals', (req, res) => {
-  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+  const goal = {
+    id: String(goalIdCounter++),
+    ...req.body,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  goalsStore.push(goal);
+  res.status(201).json(goal);
 });
 
 // Habits endpoints
 app.get('/api/habits', (_req, res) => {
-  res.json([]);
+  res.json(habitsStore);
 });
 
 app.post('/api/habits', (req, res) => {
-  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+  const habit = {
+    id: String(habitIdCounter++),
+    ...req.body,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  habitsStore.push(habit);
+  res.status(201).json(habit);
 });
 
 // Notes endpoints
 app.get('/api/notes', (_req, res) => {
-  res.json([]);
+  res.json(notesStore);
 });
 
 app.post('/api/notes', (req, res) => {
-  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+  const note = {
+    id: String(noteIdCounter++),
+    ...req.body,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  notesStore.push(note);
+  res.status(201).json(note);
+});
+
+app.get('/api/projects', (_req, res) => {
+  res.json(projectsStore);
+});
+
+app.get('/api/workspaces', (_req, res) => {
+  res.json(workspacesStore);
 });
 
 app.use((_req, res) => {
