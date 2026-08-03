@@ -167,6 +167,7 @@ app.get('/api/tasks', async (_req, res) => {
 app.post('/api/tasks', async (req, res) => {
   try {
     const { title, description, status = 'TODO', priority = 'NONE', dueDate } = req.body;
+    console.log('POST /api/tasks - received:', { title, status });
     
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
@@ -177,11 +178,16 @@ app.post('/api/tasks', async (req, res) => {
     let userId = 'default-user';
     
     // Try to get or create default user
+    console.log('Looking for default user...');
     const existingUser = await prisma.user.findUnique({
       where: { email: 'demo@lifeos.local' }
-    }).catch(() => null);
+    }).catch((err) => {
+      console.log('User lookup error:', err.message);
+      return null;
+    });
     
     if (!existingUser) {
+      console.log('Creating default user...');
       const defaultUser = await prisma.user.create({
         data: {
           email: 'demo@lifeos.local',
@@ -190,10 +196,13 @@ app.post('/api/tasks', async (req, res) => {
         }
       });
       userId = defaultUser.id;
+      console.log('Default user created:', userId);
     } else {
       userId = existingUser.id;
+      console.log('Using existing user:', userId);
     }
 
+    console.log('Creating task with userId:', userId);
     const task = await prisma.task.create({
       data: {
         title,
@@ -215,10 +224,12 @@ app.post('/api/tasks', async (req, res) => {
       }
     });
     
+    console.log('Task created successfully:', task.id);
     return res.status(201).json(task);
-  } catch (error) {
-    console.error('Error creating task:', error);
-    return res.status(500).json({ error: 'Failed to create task' });
+  } catch (error: any) {
+    console.error('Error creating task:', error.message);
+    console.error('Error details:', error);
+    return res.status(500).json({ error: 'Failed to create task', details: error.message });
   }
 });
 
