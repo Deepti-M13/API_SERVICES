@@ -16,19 +16,27 @@ const app = express();
 
 // Initialize Firebase Admin
 let db: any = null;
+console.log('🔍 Firebase initialization check:');
+console.log('  - FIREBASE_PROJECT_ID:', env.FIREBASE_PROJECT_ID ? '✓ set' : '✗ missing');
+console.log('  - FIREBASE_SERVICE_ACCOUNT:', env.FIREBASE_SERVICE_ACCOUNT ? `✓ set (${env.FIREBASE_SERVICE_ACCOUNT.substring(0, 50)}...)` : '✗ missing');
+
 if (env.FIREBASE_PROJECT_ID && env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+    console.log('  - Parsed service account successfully');
     initializeApp({
       credential: cert(serviceAccount),
       projectId: env.FIREBASE_PROJECT_ID,
     });
     db = getFirestore();
-    console.log('✅ Firebase Firestore initialized');
+    console.log('✅ Firebase Firestore initialized successfully');
   } catch (error: any) {
-    console.warn('⚠️ Firebase initialization failed:', error.message);
-    console.warn('API will work without Firebase persistence');
+    console.error('❌ Firebase initialization failed:', error.message);
+    console.error('    Stack:', error.stack);
+    console.warn('⚠️ API will work without Firebase persistence');
   }
+} else {
+  console.warn('⚠️ Firebase credentials not fully configured');
 }
 
 // ---- Global Middleware ----
@@ -161,7 +169,11 @@ app.post('/api/tasks', async (req, res) => {
   try {
     const { title, description, status = 'TODO', priority = 'NONE', dueDate } = req.body;
     if (!title) return res.status(400).json({ error: 'Title is required' });
-    if (!db) return res.status(500).json({ error: 'Firebase not initialized' });
+    
+    if (!db) {
+      console.warn('⚠️ Firebase not initialized, cannot save task');
+      return res.status(503).json({ error: 'Database service temporarily unavailable. Please try again in a moment.' });
+    }
 
     const taskData = {
       title,
@@ -177,7 +189,11 @@ app.post('/api/tasks', async (req, res) => {
     return res.status(201).json({ id: docRef.id, ...taskData });
   } catch (error: any) {
     console.error('Error creating task:', error?.message);
-    return res.status(500).json({ error: 'Failed to create task' });
+    console.error('Full error:', error);
+    return res.status(500).json({ 
+      error: 'Failed to create task',
+      details: error?.message || 'Unknown error'
+    });
   }
 });
 
