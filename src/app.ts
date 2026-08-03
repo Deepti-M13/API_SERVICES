@@ -165,6 +165,33 @@ app.get('/api/analytics/dashboard', (_req, res) => {
   });
 });
 
+// Goals endpoints
+app.get('/api/goals', (_req, res) => {
+  res.json({ data: [] });
+});
+
+app.post('/api/goals', (req, res) => {
+  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+});
+
+// Habits endpoints
+app.get('/api/habits', (_req, res) => {
+  res.json({ data: [] });
+});
+
+app.post('/api/habits', (req, res) => {
+  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+});
+
+// Notes endpoints
+app.get('/api/notes', (_req, res) => {
+  res.json({ data: [] });
+});
+
+app.post('/api/notes', (req, res) => {
+  res.status(201).json({ id: '1', ...req.body, createdAt: new Date() });
+});
+
 app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
